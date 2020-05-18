@@ -98,6 +98,33 @@ public class ShipController {
                 new ResponseEntity<>(this.shipService.create(ship), HttpStatus.OK);
     }
 
+    @PostMapping(value = "/{id}")
+    public ResponseEntity<Ship> updateShip(@RequestBody Ship ship, @PathVariable Long id) {
+        if (ship == null
+                || isIdInvalid(id)
+                || (ship.getName() != null && isNameInvalid(ship.getName()))
+                || (ship.getPlanet() != null && isPlanetInvalid(ship.getPlanet()))
+                || (ship.getProdDate() != null && isProdDateInvalid(ship.getProdDate()))
+                || (ship.getSpeed() != null && isSpeedInvalid(ship.getSpeed()))
+                || (ship.getCrewSize() != null && isCrewSizeInvalid(ship.getCrewSize())))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        else if (this.shipService.update(ship, id) == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity<>(this.shipService.update(ship, id), HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<?> deleteShip(@PathVariable Long id) {
+        if (isIdInvalid(id))
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        return this.shipService.delete(id)
+                ? new ResponseEntity<>(HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     private boolean isIdInvalid(Long id) {
         return id == null || id != Math.floor(id) || id <= 0;
     }

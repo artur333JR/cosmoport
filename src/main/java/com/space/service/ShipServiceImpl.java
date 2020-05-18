@@ -23,17 +23,6 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public Ship create(Ship ship) {
-        if (ship.isUsed() == null) {
-            ship.setUsed(false);
-        }
-
-        ship.setSpeed((double) Math.round(ship.getSpeed() * 100) / 100);
-        ship.setRating(calculateRating(ship));
-        return shipRepository.save(ship);
-    }
-
-    @Override
     public Ship read(Long id) {
         return shipRepository.findById(id).orElse(null);
     }
@@ -77,15 +66,44 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
+    public Ship create(Ship ship) {
+        if (ship.isUsed() == null) {
+            ship.setUsed(false);
+        }
+
+        ship.setSpeed((double) Math.round(ship.getSpeed() * 100) / 100);
+        ship.setRating(calculateRating(ship));
+        return shipRepository.save(ship);
+    }
+
+    @Override
     public Ship update(Ship ship, Long id) {
-        return null;
+        Ship shipForUpdate = read(id);
+        if (shipForUpdate == null)
+            return null;
+
+        shipForUpdate.setName(ship.getName() != null ? ship.getName() : shipForUpdate.getName());
+        shipForUpdate.setPlanet(ship.getPlanet() != null ? ship.getPlanet() : shipForUpdate.getPlanet());
+        shipForUpdate.setShipType(ship.getShipType() != null ? ship.getShipType() : shipForUpdate.getShipType());
+        shipForUpdate.setProdDate(ship.getProdDate() != null ? ship.getProdDate() : shipForUpdate.getProdDate());
+        shipForUpdate.setUsed(ship.isUsed() != null ? ship.isUsed() : shipForUpdate.isUsed());
+        shipForUpdate.setSpeed(ship.getSpeed() != null ? ship.getSpeed() : shipForUpdate.getSpeed());
+        shipForUpdate.setCrewSize(ship.getCrewSize() != null ? ship.getCrewSize() : shipForUpdate.getCrewSize());
+
+        shipForUpdate.setRating(calculateRating(shipForUpdate));
+
+        return shipRepository.save(shipForUpdate);
     }
 
     @Override
     public boolean delete(Long id) {
+        if (shipRepository.existsById(id)) {
+            shipRepository.deleteById(id);
+            return true;
+        }
         return false;
     }
-    
+
     private Comparator<Ship> getComparator(ShipOrder shipOrder) {
         if (shipOrder == null) {
             return Comparator.comparingLong(Ship::getId);
@@ -112,11 +130,9 @@ public class ShipServiceImpl implements ShipService {
     }
 
     private Double calculateRating(Ship ship) {
-        double speed = ship.getSpeed();
-        double coefficientUsed = ship.isUsed() ? 0.5 : 1.0;
-        int currentYear = 3019;
-        int prodDate = ship.getProdDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().getYear();
-        double rating = (80 * speed * coefficientUsed) / (currentYear - prodDate + 1d);
+        double wearFactor = ship.isUsed() ? 0.5 : 1.0;
+        int prodYear = ship.getProdDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().getYear();
+        double rating = (80 * ship.getSpeed() * wearFactor) / (3019 - prodYear + 1d);
         return (double) Math.round(rating * 100) / 100;
     }
 }
