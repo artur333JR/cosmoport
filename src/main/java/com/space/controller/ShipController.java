@@ -40,17 +40,14 @@ public class ShipController {
                                                    @RequestParam(required = false) Integer pageNumber,
                                                    @RequestParam(required = false) Integer pageSize) {
 
-        List<Ship> filteredShips = this.shipService.getFilteredShipList(name, planet, shipType, after, before,
+        List<Ship> shipList = this.shipService.getFilteredShipList(name, planet, shipType, after, before,
                 isUsed, minSpeed, maxSpeed, minCrewSize, maxCrewSize, minRating, maxRating);
 
-        pageNumber = pageNumber == null ? 0 : pageNumber;
-        pageSize = pageSize == null ? 3 : pageSize;
+        shipList = this.shipService.getShipsPerPage(shipList, pageNumber, pageSize, order);
 
-        List<Ship> shipsPerPage = this.shipService.getShipsPerPage(filteredShips, pageNumber, pageSize, order);
-
-        return shipsPerPage != null && !shipsPerPage.isEmpty()
-                ? new ResponseEntity<>(shipsPerPage, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return shipList == null || shipList.isEmpty()
+                ? new ResponseEntity<>(HttpStatus.NOT_FOUND)
+                : new ResponseEntity<>(shipList, HttpStatus.OK);
     }
 
     @GetMapping(value = "/count")
@@ -120,9 +117,9 @@ public class ShipController {
         if (isIdInvalid(id))
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
-        return this.shipService.delete(id)
-                ? new ResponseEntity<>(HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return this.shipService.delete(id) == false
+                ? new ResponseEntity<>(HttpStatus.NOT_FOUND)
+                : new ResponseEntity<>(HttpStatus.OK);
     }
 
     private boolean isIdInvalid(Long id) {
@@ -150,5 +147,4 @@ public class ShipController {
     private boolean isCrewSizeInvalid(Integer crewSize) {
         return crewSize == null || crewSize < 1 || crewSize > 9999;
     }
-
 }

@@ -58,6 +58,9 @@ public class ShipServiceImpl implements ShipService {
         if (ships == null || ships.isEmpty())
             return ships;
 
+        pageNumber = pageNumber == null ? 0 : pageNumber;
+        pageSize = pageSize == null ? 3 : pageSize;
+
         return ships.stream()
                 .sorted(getComparator(shipOrder))
                 .skip(pageNumber * pageSize)
