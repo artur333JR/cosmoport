@@ -1,9 +1,9 @@
 # cosmoport
-JavaRush test task for online intership
-Used technologies:
-Maven
-Tomcat 9
-Spring
-Spring Data JPA
-MySQL
+# JavaRush test task for online intership
+Used technologies: <br>
+Maven <br>
+Tomcat 9 <br>
+Spring <br>
+Spring Data JPA <br>
+MySQL <br>
 
